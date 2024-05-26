@@ -1,0 +1,5 @@
+bin/*
+!bin/.env.example
+build
+lib
+.vscode
