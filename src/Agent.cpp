@@ -18,7 +18,7 @@ void Agent::startAnalyzing() {}
 void Agent::stopAnalyzing() {}
 
 std::pair<int, int> Agent::getMove(JSON const& boardFromReferee) {
-    BoardQuery bq(boardFromReferee, Configuration::getInstance().getSelfTeamRole());
+    State bq(boardFromReferee, Configuration::getInstance().getSelfTeamRole());
     std::cout << "There are " << bq.getCellMetrics(EMPTY_CELL).count << " empty cells." << std::endl;
     return bq.getFirstEmptyCellLocation();
 }

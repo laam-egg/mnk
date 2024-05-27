@@ -118,12 +118,18 @@ void GameClient::waitTillAllowedToMove() {
                 return;
             }
 
-            if (Configuration::getInstance().getSelfId().find(response["turn"]) != std::string::npos) {
+            bool isSelfTurn = false;
+            bool isOtherTurn = false;
+            if (Configuration::getInstance().getSelfId() == response["turn"]) {
                 isAllowedToMoveNow = true;
-            } else if (Configuration::getInstance().getOtherId().find(response["turn"]) != std::string::npos) {
+                isSelfTurn = true;
+            }
+            if (Configuration::getInstance().getOtherId() == response["turn"]) {
                 isAllowedToMoveNow = false;
-            } else {
-                throw std::runtime_error("Could not resolve id of the team that is allowed to move now");
+                isOtherTurn = true;
+            }
+            if (isSelfTurn == isOtherTurn || (isSelfTurn && !isAllowedToMoveNow) || (isOtherTurn && isAllowedToMoveNow)) {
+                throw std::runtime_error("could not resolve turn");
             }
             if (!isAllowedToMoveNow) goto CONTINUE;
             return;

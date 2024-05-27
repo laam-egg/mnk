@@ -7,10 +7,10 @@ add_executable(main
     main.cpp
     Agent.cpp
     Application.cpp
-    BoardQuery.cpp
     Configuration.cpp
     GameClient.cpp
     ServerForFrontend.cpp
+    State.cpp
 )
 target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 

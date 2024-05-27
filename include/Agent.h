@@ -3,7 +3,7 @@
 
 #include <utility>      // std::pair
 #include <nlohmann/json.hpp>
-#include "BoardQuery.h"
+#include "State.h"
 
 class Agent {
 public:

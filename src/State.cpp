@@ -1,7 +1,11 @@
-#include "BoardQuery.h"
+#include "State.h"
 
-OptimizedBoard BoardQuery::loadRefereeBoard(JSON const& boardFromReferee, std::string const& teamRole) {
-    std::vector<std::vector<std::string>> refereeBoard = boardFromReferee;
+OptimizedBoard State::loadRefereeBoard(JSON const& refereeBoard, std::string const& teamRole) {
+    ///////////////////////////////////////
+    /// Translate board and count cells ///
+    ///////////////////////////////////////
+
+    // std::vector<std::vector<std::string>> refereeBoard = boardFromReferee;
     int N = refereeBoard.size();
     if (N == 0) {
         throw std::runtime_error("invalid board");
@@ -23,11 +27,15 @@ OptimizedBoard BoardQuery::loadRefereeBoard(JSON const& boardFromReferee, std::s
                 ++m_cellType[OTHER_CELL].count;
             } else if (refereeBoard[i-1][j-1].empty() || refereeBoard[i-1][j-1] == " ") {
             } else {
-                throw std::runtime_error("unknown cell: #" + refereeBoard[i-1][j-1] + "#");
+                throw std::runtime_error("unknown cell: #" + std::string(refereeBoard[i-1][j-1]) + "#");
             }
         }
     }
     m_cellType[EMPTY_CELL].count = N * N - m_cellType[SELF_CELL].count - m_cellType[OTHER_CELL].count;
+
+    ///////////////////////////////////////
+    // Calculate center cell location(s) //
+    ///////////////////////////////////////
 
     m_centerCellLocations = {};
     if (N % 2 != 0) {
@@ -44,14 +52,14 @@ OptimizedBoard BoardQuery::loadRefereeBoard(JSON const& boardFromReferee, std::s
     return b;
 }
 
-BoardQuery::BoardQuery(JSON const& boardFromReferee, std::string teamRole)
+State::State(JSON const& boardFromReferee, std::string teamRole)
 :
     m_cellType{},
     m_centerCellLocations{},
     m_board{ loadRefereeBoard(boardFromReferee, teamRole) }
 {}
 
-std::pair<int, int> BoardQuery::getFirstEmptyCellLocation() const {
+std::pair<int, int> State::getFirstEmptyCellLocation() const {
     for (auto const& c : getCenterCellLocations()) {
         if (m_board[c] == EMPTY_CELL) {
             return c;
@@ -86,4 +94,15 @@ std::pair<int, int> BoardQuery::getFirstEmptyCellLocation() const {
     }
     // No empty cell
     throw std::runtime_error("No empty cell left");
+}
+
+bool State::operator==(State const& other) const {
+    if (m_board.size() != other.m_board.size()) return false;
+    for (int i = 1; i < m_board.size(); ++i) {
+        // if (m_board[i].size() != other.m_board[i].size()) return false;
+        for (int j = 1; j < m_board[i].size(); ++j) {
+            if (m_board[i][j] != other.m_board[i][j]) return false;
+        }
+    }
+    return true;
 }

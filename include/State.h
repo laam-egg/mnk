@@ -1,5 +1,5 @@
-#ifndef BoardQuery_INCLUDED
-#define BoardQuery_INCLUDED
+#ifndef State_INCLUDED
+#define State_INCLUDED
 
 #include <utility>              // for std::pair
 #include <vector>
@@ -29,7 +29,7 @@ enum CellType : std::int8_t {
     NUM_CELL_TYPES
 };
 
-struct CellMetrics {
+struct CellStats {
     int count{ 0 };
 };
 
@@ -44,17 +44,19 @@ struct CellMetrics {
  * also provides methods to query the
  * board in multiple ways.
  */
-class BoardQuery {
+class State {
 public:
-    BoardQuery(JSON const& boardFromReferee, std::string teamRole);
-    ~BoardQuery() = default;
+    State(JSON const& boardFromReferee, std::string teamRole);
+    ~State() = default;
 
-    CellMetrics const& getCellMetrics(CellType cellType) const { return m_cellType[cellType]; }
+    CellStats const& getCellMetrics(CellType cellType) const { return m_cellType[cellType]; }
     std::vector<std::pair<int, int>> const& getCenterCellLocations() const { return m_centerCellLocations; }
     std::pair<int, int> getFirstEmptyCellLocation() const;
 
+    bool operator==(State const& other) const;
+
 private:
-    CellMetrics m_cellType[NUM_CELL_TYPES];
+    CellStats m_cellType[NUM_CELL_TYPES];
     std::vector<std::pair<int, int>> m_centerCellLocations;
 
     // this board is the last one to be initialized,
@@ -65,4 +67,4 @@ private:
     OptimizedBoard loadRefereeBoard(JSON const& boardFromReferee, std::string const& teamRole);
 };
 
-#endif // BoardQuery_INCLUDED
+#endif // State_INCLUDED
