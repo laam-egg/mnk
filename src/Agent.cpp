@@ -17,8 +17,7 @@ void Agent::setMoveFirst(bool moveFirst) {
 void Agent::startAnalyzing() {}
 void Agent::stopAnalyzing() {}
 
-std::pair<int, int> Agent::getMove(JSON const& boardFromReferee) {
-    State bq(boardFromReferee, Configuration::getInstance().getSelfTeamRole());
-    std::cout << "There are " << bq.getCellMetrics(EMPTY_CELL).count << " empty cells." << std::endl;
-    return bq.getFirstEmptyCellLocation();
+std::pair<int, int> Agent::getMove(State const& state) {
+    std::cout << "There are " << state.getCellMetrics(EMPTY_CELL).count << " empty cells." << std::endl;
+    return state.getFirstEmptyCellLocation();
 }

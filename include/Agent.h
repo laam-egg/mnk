@@ -2,7 +2,6 @@
 #define Agent_INCLUDED
 
 #include <utility>      // std::pair
-#include <nlohmann/json.hpp>
 #include "State.h"
 
 class Agent {
@@ -16,7 +15,7 @@ public:
     void startAnalyzing();
     void stopAnalyzing();
 
-    std::pair<int, int> getMove(JSON const& boardFromReferee);
+    std::pair<int, int> getMove(State const& state);
 
 private:
     bool m_analyzing;

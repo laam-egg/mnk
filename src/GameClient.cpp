@@ -149,7 +149,8 @@ void GameClient::waitTillAllowedToMove() {
 void GameClient::move() {
     if (!isRunning()) return;
 
-    std::pair<int, int> move = m_agent.getMove(m_board);
+    State state(m_board, Configuration::getInstance().getSelfTeamRole());
+    std::pair<int, int> move = m_agent.getMove(state);
     m_board[move.first-1][move.second-1] = Configuration::getInstance().getSelfTeamRole();
     std::cout << "Self  Move: " << move.first-1 << "," << move.second-1 << std::endl;
 
