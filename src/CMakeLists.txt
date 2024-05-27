@@ -8,6 +8,7 @@ add_executable(main
     Agent.cpp
     Application.cpp
     Configuration.cpp
+    CellIterator.cpp
     GameClient.cpp
     ServerForFrontend.cpp
     State.cpp

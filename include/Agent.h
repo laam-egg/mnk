@@ -2,7 +2,7 @@
 #define Agent_INCLUDED
 
 #include <utility>      // std::pair
-#include "State.h"
+#include "state/State.h"
 
 class Agent {
 public:

@@ -3,24 +3,10 @@
 
 #include <utility>              // for std::pair
 #include <vector>
+#include "state/OptimizedBoard.h"
+#include "state/CellIterator.h"
 #include <nlohmann/json.hpp>
 using JSON = nlohmann::json;
-
-template<typename T>
-class GenericOptimizedBoard final : public std::vector<std::vector<T>> {
-public:
-    using std::vector<std::vector<T>>::vector;
-
-    using std::vector<std::vector<T>>::operator[];
-    T& operator[](std::pair<int, int> const& location) {
-        return (*this)[location.first][location.second];
-    }
-    T const& operator[](std::pair<int, int> const& location) const {
-        return (*this)[location.first][location.second];
-    }
-};
-
-using OptimizedBoard = GenericOptimizedBoard<std::int8_t>;
 
 enum CellType : std::int8_t {
     EMPTY_CELL = 0,
@@ -34,7 +20,9 @@ struct CellStats {
 };
 
 /**
- * @brief A class for board query.
+ * @brief A class representing
+ * board state, and supporting
+ * queries also.
  * 
  * @details It is used to convert
  * from the board format used by
@@ -52,6 +40,12 @@ public:
     CellStats const& getCellMetrics(CellType cellType) const { return m_cellType[cellType]; }
     std::vector<std::pair<int, int>> const& getCenterCellLocations() const { return m_centerCellLocations; }
     std::pair<int, int> getFirstEmptyCellLocation() const;
+    inline bool isCellEmpty(std::pair<int, int> const& location) const { return m_board[location] == EMPTY_CELL; }
+    inline bool isCellSelf(std::pair<int, int> const& location) const { return m_board[location] == SELF_CELL; }
+    inline bool isCellOther(std::pair<int, int> const& location) const { return m_board[location] == OTHER_CELL; }
+    inline OptimizedBoard const& getBoard() const { return m_board; }
+
+    inline CellIterator cells() const { return CellIterator(*this); }
 
     bool operator==(State const& other) const;
 

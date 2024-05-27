@@ -1,4 +1,4 @@
-#include "State.h"
+#include "state/State.h"
 
 OptimizedBoard State::loadRefereeBoard(JSON const& refereeBoard, std::string const& teamRole) {
     ///////////////////////////////////////
@@ -60,39 +60,11 @@ State::State(JSON const& boardFromReferee, std::string teamRole)
 {}
 
 std::pair<int, int> State::getFirstEmptyCellLocation() const {
-    for (auto const& c : getCenterCellLocations()) {
+    for (auto const& c : cells()) {
         if (m_board[c] == EMPTY_CELL) {
             return c;
         }
     }
-    auto leftTopOfVisitedSquare = getCenterCellLocations().front();
-    auto rightBottomOfVisitedSquare = getCenterCellLocations().back();
-
-    while (leftTopOfVisitedSquare.first >= 2) {
-        --leftTopOfVisitedSquare.first;
-        --leftTopOfVisitedSquare.second;
-        ++rightBottomOfVisitedSquare.first;
-        ++rightBottomOfVisitedSquare.second;
-
-        // TOP EDGE
-        auto c = leftTopOfVisitedSquare;
-        for (; c.second < rightBottomOfVisitedSquare.second; ++c.second) {
-            if (m_board[c] == EMPTY_CELL) return c;
-        }
-        // RIGHT EDGE
-        for (; c.first < rightBottomOfVisitedSquare.first; ++c.first) {
-            if (m_board[c] == EMPTY_CELL) return c;
-        }
-        // BOTTOM EDGE
-        for (; c.second > leftTopOfVisitedSquare.second; --c.second) {
-            if (m_board[c] == EMPTY_CELL) return c;
-        }
-        // LEFT EDGE
-        for (; c.first > leftTopOfVisitedSquare.first; --c.first) {
-            if (m_board[c] == EMPTY_CELL) return c;
-        }
-    }
-    // No empty cell
     throw std::runtime_error("No empty cell left");
 }
 
