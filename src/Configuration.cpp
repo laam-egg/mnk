@@ -16,6 +16,8 @@ Configuration Configuration::makeInstance() {
     auto const frontendServerPort = envPrefix.register_required_variable<unsigned int>("FRONTEND_SERVER_PORT");
     auto const refereeServerAddress = envPrefix.register_required_variable<std::string>("REFEREE_SERVER_ADDRESS");
 
+    auto const sequenceLengthToWin = envPrefix.register_required_variable<unsigned int>("SEQUENCE_LENGTH_TO_WIN");
+
     auto const roomId = envPrefix.register_required_variable<std::string>("ROOM_ID");
     auto const selfId = envPrefix.register_required_variable<std::string>("SELF_ID");
     auto const otherId = envPrefix.register_required_variable<std::string>("OTHER_ID");
@@ -34,6 +36,7 @@ Configuration Configuration::makeInstance() {
         parsedAndValidatedPrefix.get(frontendServerHostName),
         parsedAndValidatedPrefix.get(frontendServerPort),
         parsedAndValidatedPrefix.get(refereeServerAddress),
+        parsedAndValidatedPrefix.get(sequenceLengthToWin),
         parsedAndValidatedPrefix.get(roomId),
         parsedAndValidatedPrefix.get(selfId),
         parsedAndValidatedPrefix.get(otherId),

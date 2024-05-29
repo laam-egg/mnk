@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <utility>      // std::pair
+#include "state/CellType.h"
 
 template<typename T>
 class GenericOptimizedBoard final : public std::vector<std::vector<T>> {
@@ -26,6 +27,6 @@ public:
  * internal processing of
  * states.
  */
-using OptimizedBoard = GenericOptimizedBoard<std::int8_t>;
+using OptimizedBoard = GenericOptimizedBoard<CellType>;
 
 #endif // OptimizedBoard_INCLUDED

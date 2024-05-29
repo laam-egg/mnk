@@ -12,6 +12,7 @@ public:
     unsigned int getFrontendServerPort() const                      { return m_frontendServerPort; }
     std::string const& getFrontendServerHostName() const            { return m_frontendServerHostName; }
     std::string const& getRefereeServerAddress() const              { return m_refereeServerAddress; }
+    unsigned int getSequenceLengthToWin() const                     { return m_sequenceLengthToWin; }
     
     std::string const& getRoomId() const                            { return m_roomId; }
     std::string const& getSelfId() const                            { return m_selfId; }
@@ -29,6 +30,7 @@ private:
     unsigned int m_frontendServerPort;
 
     std::string m_refereeServerAddress;
+    unsigned int m_sequenceLengthToWin;
 
     std::string m_roomId;
     std::string m_selfId;
@@ -41,6 +43,7 @@ private:
         std::string frontendServerHostName,
         unsigned int frontendServerPort,
         std::string refereeServerAddress,
+        unsigned int sequenceLengthToWin,
         std::string roomId,
         std::string selfId,
         std::string otherId,
@@ -49,6 +52,7 @@ private:
         m_frontendServerHostName(frontendServerHostName),
         m_frontendServerPort(frontendServerPort),
         m_refereeServerAddress(refereeServerAddress),
+        m_sequenceLengthToWin(sequenceLengthToWin),
         m_roomId(roomId),
         m_selfId(selfId),
         m_otherId(otherId),

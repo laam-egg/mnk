@@ -17,7 +17,7 @@ CellIterator CellIterator::end() {
 }
 
 CellIterator& CellIterator::operator++() {
-    int N = m_state.getBoard().size();
+    int N = m_state.getBoard().size() - 1;
 
     std::pair<int, int> leftTopOfVisitedSquare = m_visitedSquare_leftTop;
     std::pair<int, int> rightBottomOfVisitedSquare{
@@ -27,6 +27,10 @@ CellIterator& CellIterator::operator++() {
 
     switch (m_currentEdgeType) {
         case EdgeType::TOP:
+            if (leftTopOfVisitedSquare == rightBottomOfVisitedSquare) {
+                // Second iteration with 1-cell square
+                goto HANDLE_ONE_CELL_SQUARE_NEXT_ITERATION;
+            }
             if (m_current.second < rightBottomOfVisitedSquare.second) {
                 ++m_current.second;
                 return *this;
@@ -53,11 +57,12 @@ CellIterator& CellIterator::operator++() {
         case EdgeType::LEFT:
             [[fallthrough]];
         default:
-            if (m_current.first > leftTopOfVisitedSquare.first) {
+            if (m_current.first > leftTopOfVisitedSquare.first + 1) {
                 --m_current.first;
                 return *this;
             }
-
+        HANDLE_ONE_CELL_SQUARE_NEXT_ITERATION:
+        m_currentEdgeType = EdgeType::TOP;
         // Expand to the outer square
         m_visitedSquare_leftTop = { leftTopOfVisitedSquare.first - 1, leftTopOfVisitedSquare.second - 1 };
         if (m_visitedSquare_leftTop.first < 1) {
@@ -65,7 +70,6 @@ CellIterator& CellIterator::operator++() {
         } else {
             m_current = m_visitedSquare_leftTop;
         }
-        m_currentEdgeType = EdgeType::TOP;
         return *this;
     }
 }

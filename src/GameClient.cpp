@@ -43,16 +43,17 @@ void GameClient::initialize() {
 
             std::string const verboseTeam1Id = response["team1_id"];
             std::string const verboseTeam2Id = response["team2_id"];
-            if (verboseTeam1Id.find(Configuration::getInstance().getSelfId()) != std::string::npos) {
+            std::string const verboseSelfId = Configuration::getInstance().getSelfId() + '+' + Configuration::getInstance().getSelfTeamRole();
+            if (verboseTeam1Id == verboseSelfId) {
                 Configuration::getInstance().setSelfId(verboseTeam1Id);
                 Configuration::getInstance().setOtherId(verboseTeam2Id);
                 m_moveFirst = true;
-            } else if (verboseTeam2Id.find(Configuration::getInstance().getSelfId()) != std::string::npos) {
+            } else if (verboseTeam2Id == verboseSelfId) {
                 Configuration::getInstance().setSelfId(verboseTeam2Id);
                 Configuration::getInstance().setOtherId(verboseTeam1Id);
                 m_moveFirst = false;
             } else {
-                throw std::runtime_error("Could not resolve team id");
+                throw std::runtime_error("Could not resolve team id. Remember: the team that joins first is ALWAYS team1, and their role is ALWAYS x.");
             }
             m_size = response["size"];
             m_agent.setSize(m_size);
@@ -118,18 +119,8 @@ void GameClient::waitTillAllowedToMove() {
                 return;
             }
 
-            bool isSelfTurn = false;
-            bool isOtherTurn = false;
             if (Configuration::getInstance().getSelfId() == response["turn"]) {
                 isAllowedToMoveNow = true;
-                isSelfTurn = true;
-            }
-            if (Configuration::getInstance().getOtherId() == response["turn"]) {
-                isAllowedToMoveNow = false;
-                isOtherTurn = true;
-            }
-            if (isSelfTurn == isOtherTurn || (isSelfTurn && !isAllowedToMoveNow) || (isOtherTurn && isAllowedToMoveNow)) {
-                throw std::runtime_error("could not resolve turn");
             }
             if (!isAllowedToMoveNow) goto CONTINUE;
             return;
@@ -149,7 +140,11 @@ void GameClient::waitTillAllowedToMove() {
 void GameClient::move() {
     if (!isRunning()) return;
 
-    State state(m_board, Configuration::getInstance().getSelfTeamRole());
+    State state(m_board, (
+        Configuration::getInstance().getSelfTeamRole().find('x') != std::string::npos
+        ? "x" : "o"
+    ), m_moveFirst);
+
     std::pair<int, int> move = m_agent.getMove(state);
     m_board[move.first-1][move.second-1] = Configuration::getInstance().getSelfTeamRole();
     std::cout << "Self  Move: " << move.first-1 << "," << move.second-1 << std::endl;

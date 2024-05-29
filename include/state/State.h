@@ -3,17 +3,12 @@
 
 #include <utility>              // for std::pair
 #include <vector>
+#include <array>
+#include "state/CellType.h"
 #include "state/OptimizedBoard.h"
 #include "state/CellIterator.h"
 #include <nlohmann/json.hpp>
 using JSON = nlohmann::json;
-
-enum CellType : std::int8_t {
-    EMPTY_CELL = 0,
-    SELF_CELL,
-    OTHER_CELL,
-    NUM_CELL_TYPES
-};
 
 struct CellStats {
     int count{ 0 };
@@ -34,7 +29,12 @@ struct CellStats {
  */
 class State {
 public:
-    State(JSON const& boardFromReferee, std::string teamRole);
+    State(JSON const& boardFromReferee, std::string teamRole, bool moveFirst);
+    explicit State(State other, std::pair<int, int> const& actionLocation);
+    State(State const& other) = default;
+    State(State&& other) = default;
+    State& operator=(State const& other) = default;
+    State& operator=(State&& other) = default;
     ~State() = default;
 
     CellStats const& getCellMetrics(CellType cellType) const { return m_cellType[cellType]; }
@@ -47,18 +47,34 @@ public:
 
     inline CellIterator cells() const { return CellIterator(*this); }
 
+    inline bool isTerminal() const { return m_isTerminal; }
+    inline float getValue() const { return m_value; }
+
     bool operator==(State const& other) const;
+    inline bool operator!=(State const& other) const { return !(*this == other); }
+
+    friend std::ostream& operator<<(std::ostream& os, State const& state);
 
 private:
-    CellStats m_cellType[NUM_CELL_TYPES];
+    std::array<CellStats, NUM_CELL_TYPES> m_cellType;
     std::vector<std::pair<int, int>> m_centerCellLocations;
-
+    bool m_moveFirst;
+    float m_value;
+    bool m_isTerminal;
     // this board is the last one to be initialized,
-    // so it must be put here, not before the other
+    // so it must be put here, after all the other
     // private member variables !
-    OptimizedBoard const m_board;
+    OptimizedBoard m_board;
+
+    void calculateCenterCellLocations();
 
     OptimizedBoard loadRefereeBoard(JSON const& boardFromReferee, std::string const& teamRole);
+
+    void applyAction(std::pair<int, int> const& actionLocation);
+
+    void evaluateSelfFromScratch();
+
+    void evaluateSelfBasedOnLastAction(std::pair<int, int> const& actionLocation);
 };
 
 #endif // State_INCLUDED
