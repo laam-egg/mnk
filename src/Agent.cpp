@@ -157,7 +157,7 @@ public:
         // TODO: always return node->children[0];
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(0, node->children.size() - 1);
+        std::uniform_int_distribution<> dis(0, node->state.getCellMetrics(EMPTY_CELL).count - 1);
         return node->children[dis(gen)];
     }
 

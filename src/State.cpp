@@ -213,9 +213,11 @@ State::State(JSON const& boardFromReferee, std::string teamRole, bool moveFirst)
 State::State(State other, std::pair<int, int> const& actionLocation)
 :
     m_cellType{ other.m_cellType },
+    m_centerCellLocations{}, // will be swapped later
     m_moveFirst{ other.m_moveFirst },
     m_value{ other.m_value },
-    m_isTerminal{ other.m_isTerminal }
+    m_isTerminal{ other.m_isTerminal },
+    m_board{} // will be swapped later
 {
     swap(m_centerCellLocations, other.m_centerCellLocations);
     swap(m_board, other.m_board);
