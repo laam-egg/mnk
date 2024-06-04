@@ -18,6 +18,8 @@ Configuration Configuration::makeInstance() {
 
     auto const sequenceLengthToWin = envPrefix.register_required_variable<unsigned int>("SEQUENCE_LENGTH_TO_WIN");
 
+    auto const mctsSecondsPerMove = envPrefix.register_required_variable<float>("MCTS_SECONDS_PER_MOVE");
+
     auto const roomId = envPrefix.register_required_variable<std::string>("ROOM_ID");
     auto const selfId = envPrefix.register_required_variable<std::string>("SELF_ID");
     auto const otherId = envPrefix.register_required_variable<std::string>("OTHER_ID");
@@ -37,6 +39,7 @@ Configuration Configuration::makeInstance() {
         parsedAndValidatedPrefix.get(frontendServerPort),
         parsedAndValidatedPrefix.get(refereeServerAddress),
         parsedAndValidatedPrefix.get(sequenceLengthToWin),
+        parsedAndValidatedPrefix.get(mctsSecondsPerMove),
         parsedAndValidatedPrefix.get(roomId),
         parsedAndValidatedPrefix.get(selfId),
         parsedAndValidatedPrefix.get(otherId),

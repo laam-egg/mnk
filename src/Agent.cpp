@@ -169,20 +169,16 @@ public:
                 thread_local std::mt19937 gen(rd());
                 thread_local std::uniform_int_distribution<> dis(0, 9);
 
-                std::unique_ptr<State const> statePtr{ &node->state };
-                while (!statePtr->isTerminal()) {
-                    for (std::pair<int, int> const& actionLocation : statePtr->cells()) {
-                        if (statePtr->isCellEmpty(actionLocation) && dis(gen) < 3) {
-                            if (statePtr.get() == std::addressof(node->state)) {
-                                statePtr = std::make_unique<State>(*statePtr.release(), actionLocation);
-                            } else {
-                                statePtr = std::make_unique<State>(std::move(*statePtr), actionLocation);
-                            }
+                State state{ node->state };
+                while (!state.isTerminal()) {
+                    for (std::pair<int, int> const& actionLocation : state.cells()) {
+                        if (state.isCellEmpty(actionLocation) && dis(gen) < 3) {
+                            state.applyAction(actionLocation);
                             break;
                         }
                     }
                 }
-                backpropagate(node, statePtr->getValue());
+                backpropagate(node, state.getValue());
                 return;
             } else {
                 std::random_device rd;
@@ -214,7 +210,8 @@ public:
         }
         // TODO: There are rooms for optimization here
         // TODO: Take account of the number of losts
-        return (float)node->numWinsSoFar / node->numSimulations + 1.41f * std::sqrt(std::log(m_root->numSimulations) / node->numSimulations);
+        float const C = 1.41f;
+        return (float)node->numWinsSoFar / node->numSimulations + C * std::sqrt(std::log((node->parent == nullptr ? m_root : node->parent)->numSimulations) / node->numSimulations);
     }
 };
 
@@ -223,7 +220,7 @@ std::pair<int, int> Agent::getMove(State const& state) {
     // return state.getFirstEmptyCellLocation();
     Node root(nullptr, SHALLOW_COPY_STATE, state, { -1, -1 });
     MCTS mcts(&root);
-    float const analyzeTimeInSeconds = 1.0f;
+    float const analyzeTimeInSeconds = Configuration::getInstance().getMctsSecondsPerMove();
     int numSimulations;
     std::pair<int, int> move = mcts.run(std::chrono::duration<float>(analyzeTimeInSeconds), numSimulations);
     std::cout << "Number of simulations in " << analyzeTimeInSeconds << " seconds: " << numSimulations << std::endl;

@@ -44,6 +44,7 @@ public:
     inline bool isCellSelf(std::pair<int, int> const& location) const { return m_board[location] == SELF_CELL; }
     inline bool isCellOther(std::pair<int, int> const& location) const { return m_board[location] == OTHER_CELL; }
     inline OptimizedBoard const& getBoard() const { return m_board; }
+    void applyAction(std::pair<int, int> const& actionLocation);
 
     inline CellIterator cells() const { return CellIterator(*this); }
 
@@ -69,8 +70,6 @@ private:
     void calculateCenterCellLocations();
 
     OptimizedBoard loadRefereeBoard(JSON const& boardFromReferee, std::string const& teamRole);
-
-    void applyAction(std::pair<int, int> const& actionLocation);
 
     void evaluateSelfFromScratch();
 
