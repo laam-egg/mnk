@@ -1,7 +1,7 @@
 #include "state/State.h"
-#include "Configuration.h"
 #include <stdexcept>
 #include <utility>          // std::swap
+#include <iostream>         // std::ostream
 using std::swap;
 
 void State::evaluateSelfFromScratch() {
@@ -17,7 +17,7 @@ void State::evaluateSelfFromScratch() {
         int sumOtherWin;
     } memo; // memoization
     
-    int currentSequenceLengthToWin = Configuration::getInstance().getSequenceLengthToWin();
+    int currentSequenceLengthToWin = m_lineLengthToWin;
     if (currentSequenceLengthToWin != memo.sequenceLengthToWin) {
         memo.sequenceLengthToWin = currentSequenceLengthToWin;
         memo.sumSelfWin = currentSequenceLengthToWin * SELF_CELL;
@@ -151,12 +151,11 @@ void State::calculateCenterCellLocations() {
     }
 }
 
-OptimizedBoard State::loadRefereeBoard(JSON const& refereeBoard, std::string const& teamRole) {
+OptimizedBoard State::loadRefereeBoard(std::vector<std::vector<std::string>> const& refereeBoard, std::string const& teamRole) {
     ///////////////////////////////////////
     /// Translate board and count cells ///
     ///////////////////////////////////////
 
-    // std::vector<std::vector<std::string>> refereeBoard = boardFromReferee;
     int N = refereeBoard.size();
     if (N == 0) {
         throw std::runtime_error("invalid board");
@@ -200,13 +199,14 @@ OptimizedBoard State::loadRefereeBoard(JSON const& refereeBoard, std::string con
     return b;
 }
 
-State::State(JSON const& boardFromReferee, std::string teamRole, bool moveFirst)
+State::State(std::vector<std::vector<std::string>> const& boardFromReferee, std::string teamRole, int lineLengthToWin, bool moveFirst)
 :
     m_cellType{},
     m_centerCellLocations{},
     m_moveFirst{ moveFirst },
     m_value{},
     m_isTerminal{},
+    m_lineLengthToWin{ lineLengthToWin },
     m_board{ loadRefereeBoard(boardFromReferee, teamRole) }
 {}
 
@@ -277,7 +277,7 @@ void State::evaluateSelfBasedOnLastAction(std::pair<int, int> const& actionLocat
 
     CellType cellType = m_board[actionLocation];
     int N = m_board.size() - 1;
-    int sequenceLengthToWin = Configuration::getInstance().getSequenceLengthToWin();
+    int sequenceLengthToWin = m_lineLengthToWin;
     int sequenceLength;
 
 #define CHECK_SEQUENCE_LENGTH(sequenceLength) { \

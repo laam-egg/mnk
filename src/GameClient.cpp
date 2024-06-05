@@ -2,9 +2,11 @@
 #include "Configuration.h"
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <string>
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
-using JSON = JSON;
+using JSON = nlohmann::json;
 
 GameClient::GameClient() {
     m_isRunning = true;
@@ -56,9 +58,6 @@ void GameClient::initialize() {
                 throw std::runtime_error("Could not resolve team id. Remember: the team that joins first is ALWAYS team1, and their role is ALWAYS x.");
             }
             m_size = response["size"];
-            m_agent.setSize(m_size);
-            m_agent.setMoveFirst(m_moveFirst);
-            m_agent.startAnalyzing();
 
             std::cout << "Board Size: " << m_size << std::endl;
             std::cout << "Self team role: " << Configuration::getInstance().getSelfTeamRole() << std::endl;
@@ -96,7 +95,7 @@ void GameClient::waitTillAllowedToMove() {
         );
 
         if (r.status_code == 200) {
-            bool isAllowedToMoveNow;
+            bool isAllowedToMoveNow = false;
             JSON response = JSON::parse(r.text);
             m_status = response["status"];
             m_board = response["board"];
@@ -140,12 +139,22 @@ void GameClient::waitTillAllowedToMove() {
 void GameClient::move() {
     if (!isRunning()) return;
 
-    State state(m_board, (
-        Configuration::getInstance().getSelfTeamRole().find('x') != std::string::npos
-        ? "x" : "o"
-    ), m_moveFirst);
+    // https://github.com/nlohmann/json/issues/1730#issuecomment-663981127
+    std::vector<std::vector<std::string>> b = m_board;
+    State state(
+        b,
+        (
+            Configuration::getInstance().getSelfTeamRole().find('x') != std::string::npos
+            ? "x" : "o"
+        ),
+        Configuration::getInstance().getSequenceLengthToWin(),
+        m_moveFirst
+    );
 
-    std::pair<int, int> move = m_agent.getMove(state);
+    float const analyzeTimeInSeconds = Configuration::getInstance().getMctsSecondsPerMove();
+    int numSimulations = 0;
+    std::pair<int, int> move = m_agent.getMove(state, analyzeTimeInSeconds, &numSimulations);
+    std::cout << "Number of simulations in " << analyzeTimeInSeconds << " seconds: " << numSimulations << std::endl;
     m_board[move.first-1][move.second-1] = Configuration::getInstance().getSelfTeamRole();
     std::cout << "Self  Move: " << move.first-1 << "," << move.second-1 << std::endl;
 

@@ -1,25 +1,9 @@
 #include "Agent.h"
-#include "Configuration.h"
 #include "state/CellType.h"
 #include <vector>
 #include <chrono>           // std::chrono::high_resolution_clock
 #include <random>           // std::random_device, std::mt19937, std::uniform_int_distribution
-
-Agent::Agent()
-: m_size{ 0 }, m_moveFirst{ false }, m_analyzing{ false }, m_activeMode{ false }
-{}
-
-void Agent::setSize(int size) {
-    m_size = size;
-}
-
-void Agent::setMoveFirst(bool moveFirst) {
-    m_moveFirst = moveFirst;
-    m_activeMode = moveFirst;
-}
-
-void Agent::startAnalyzing() {}
-void Agent::stopAnalyzing() {}
+#include <cassert>          // assert
 
 struct DEEP_COPY_STATE_t {};
 struct SHALLOW_COPY_STATE_t {};
@@ -120,7 +104,8 @@ public:
         }
 
         if (!bestChildSoFar) {
-            throw std::runtime_error("algorithm fault, absolutely no children found.");
+            // throw std::runtime_error("algorithm fault, absolutely no children found.");
+            return m_root->state.getFirstEmptyCellLocation();
         }
         return bestChildSoFar->actionFromParent;
     }
@@ -215,14 +200,15 @@ public:
     }
 };
 
-std::pair<int, int> Agent::getMove(State const& state) {
+std::pair<int, int> Agent::getMove(State const& state, float const& analyzeTimeInSeconds, int* const numberOfSimulationsPerformed) {
     // std::cout << "There are " << state.getCellMetrics(EMPTY_CELL).count << " empty cells." << std::endl;
     // return state.getFirstEmptyCellLocation();
     Node root(nullptr, SHALLOW_COPY_STATE, state, { -1, -1 });
     MCTS mcts(&root);
-    float const analyzeTimeInSeconds = Configuration::getInstance().getMctsSecondsPerMove();
     int numSimulations;
     std::pair<int, int> move = mcts.run(std::chrono::duration<float>(analyzeTimeInSeconds), numSimulations);
-    std::cout << "Number of simulations in " << analyzeTimeInSeconds << " seconds: " << numSimulations << std::endl;
+    if (numberOfSimulationsPerformed != nullptr) {
+        *numberOfSimulationsPerformed = numSimulations;
+    }
     return move;
 }
