@@ -60,11 +60,13 @@ public:
 class MCTS {
 private:
     Node* m_root;
+    std::mt19937 gen;
 
 public:
     MCTS(Node* root)
     :
-        m_root{ root }
+        m_root{ root },
+        gen{ std::random_device{}() }
     {}
 
     using duration_t = std::chrono::duration<float>;
@@ -131,6 +133,10 @@ public:
             return node;
         }
 
+        if (node->state.isTerminal()) {
+            return node;
+        }
+
         if (node->children.empty()) {
             for (auto const& cell : node->state.cells()) {
                 if (node->state.isCellEmpty(cell)) {
@@ -140,9 +146,9 @@ public:
         }
 
         // TODO: always return node->children[0];
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(0, node->state.getCellMetrics(EMPTY_CELL).count - 1);
+        int upperBound = node->state.getCellMetrics(EMPTY_CELL).count - 1;
+        assert(upperBound >= 0);
+        std::uniform_int_distribution<> dis(0, upperBound);
         return node->children[dis(gen)];
     }
 
@@ -150,9 +156,7 @@ public:
         assert(node != nullptr);
         while (!node->state.isTerminal()) {
             if (node->children.empty()) {
-                thread_local std::random_device rd;
-                thread_local std::mt19937 gen(rd());
-                thread_local std::uniform_int_distribution<> dis(0, 9);
+                std::uniform_int_distribution<> dis(0, 9);
 
                 State state{ node->state };
                 while (!state.isTerminal()) {
@@ -166,9 +170,9 @@ public:
                 backpropagate(node, state.getValue());
                 return;
             } else {
-                std::random_device rd;
-                std::mt19937 gen(rd());
-                std::uniform_int_distribution<> dis(0, node->children.size() - 1);
+                int upperBound = (int)node->children.size() - 1;
+                assert(upperBound >= 0);
+                std::uniform_int_distribution<> dis(0, upperBound);
 
                 node = node->children[dis(gen)];
                 assert(node != nullptr);
